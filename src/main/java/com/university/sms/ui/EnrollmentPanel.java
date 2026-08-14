@@ -27,7 +27,7 @@ import java.util.List;
 public class EnrollmentPanel extends JPanel implements Refreshable {
 
     private static final String[] COLUMNS =
-            {"Enrollment ID", "Course Code", "Course Name", "Credits", "Enrolled Date", "Grade"};
+            {"Enrollment ID", "Course Code", "Course Name", "Credits", "Enrolled Date", "Marks", "Grade"};
 
     private final StudentDAO studentDAO = new StudentDAO();
     private final CourseDAO courseDAO = new CourseDAO();
@@ -67,6 +67,7 @@ public class EnrollmentPanel extends JPanel implements Refreshable {
         table.getColumnModel().getColumn(3).setPreferredWidth(70);
         table.getColumnModel().getColumn(4).setPreferredWidth(110);
         table.getColumnModel().getColumn(5).setPreferredWidth(60);
+        table.getColumnModel().getColumn(6).setPreferredWidth(60);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -129,7 +130,7 @@ public class EnrollmentPanel extends JPanel implements Refreshable {
             for (Enrollment en : currentEnrollments) {
                 tableModel.addRow(new Object[]{
                         en.getId(), en.getCourseCode(), en.getCourseName(),
-                        en.getCredits(), en.getEnrolledDate(), en.getGrade()
+                        en.getCredits(), en.getEnrolledDate(), en.getMarks(), en.getGrade()
                 });
             }
         } catch (SQLException e) {

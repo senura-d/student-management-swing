@@ -11,8 +11,8 @@ public class MainFrame extends JFrame {
     public MainFrame() {
         setTitle("Student Management System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1050, 680);
-        setMinimumSize(new Dimension(800, 500));
+        setSize(1300, 860);
+        setMinimumSize(new Dimension(1000, 650));
         setLocationRelativeTo(null);
 
         JTabbedPane tabs = new JTabbedPane();
@@ -21,6 +21,8 @@ public class MainFrame extends JFrame {
         tabs.addTab("Students", new StudentPanel());
         tabs.addTab("Courses", new CoursePanel());
         tabs.addTab("Enrollments", new EnrollmentPanel());
+        tabs.addTab("Marks", new MarksPanel());
+        tabs.addTab("Attendance", new AttendancePanel());
 
         // Reload each tab's data when it's selected, so changes made in one
         // tab (e.g. a new student) show up immediately in another (e.g. the

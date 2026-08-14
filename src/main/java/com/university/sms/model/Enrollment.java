@@ -14,6 +14,7 @@ public class Enrollment {
     private int studentId;
     private int courseId;
     private LocalDate enrolledDate;
+    private Integer marks;
     private String grade;
 
     private String courseCode;
@@ -53,6 +54,14 @@ public class Enrollment {
 
     public void setEnrolledDate(LocalDate enrolledDate) {
         this.enrolledDate = enrolledDate;
+    }
+
+    public Integer getMarks() {
+        return marks;
+    }
+
+    public void setMarks(Integer marks) {
+        this.marks = marks;
     }
 
     public String getGrade() {

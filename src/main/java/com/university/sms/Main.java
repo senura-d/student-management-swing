@@ -1,12 +1,13 @@
 package com.university.sms;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import com.university.sms.ui.LoginDialog;
 import com.university.sms.ui.MainFrame;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-/** Application entry point: launches the Swing UI. */
+/** Application entry point: shows the admin login, then launches the Swing UI. */
 public class Main {
 
     public static void main(String[] args) {
@@ -18,7 +19,15 @@ public class Main {
                     // fall back to whatever the default look and feel is
                 }
             }
-            new MainFrame().setVisible(true);
+
+            LoginDialog login = new LoginDialog(null);
+            login.setVisible(true);
+
+            if (login.isAuthenticated()) {
+                new MainFrame().setVisible(true);
+            } else {
+                System.exit(0);
+            }
         });
     }
 }

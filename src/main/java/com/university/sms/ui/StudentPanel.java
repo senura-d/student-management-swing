@@ -1,6 +1,9 @@
 package com.university.sms.ui;
 
+import com.university.sms.dao.EnrollmentDAO;
 import com.university.sms.dao.StudentDAO;
+import com.university.sms.model.Course;
+import com.university.sms.model.Enrollment;
 import com.university.sms.model.Student;
 
 import javax.swing.BorderFactory;
@@ -17,7 +20,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +34,7 @@ public class StudentPanel extends JPanel implements Refreshable {
             {"ID", "Full Name", "Email", "DOB", "Gender", "Contact No", "Enrollment Date"};
 
     private final StudentDAO studentDAO = new StudentDAO();
+    private final EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
     private final DefaultTableModel tableModel;
     private final JTable table;
     private final JTextField searchField;
@@ -62,12 +69,15 @@ public class StudentPanel extends JPanel implements Refreshable {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton exportButton = new JButton("Export to CSV");
+        JButton viewButton = new JButton("View Details");
         JButton addButton = new JButton("Add");
         JButton editButton = new JButton("Edit");
         JButton deleteButton = new JButton("Delete");
+        viewButton.setEnabled(false);
         editButton.setEnabled(false);
         deleteButton.setEnabled(false);
         buttonPanel.add(exportButton);
+        buttonPanel.add(viewButton);
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
@@ -80,13 +90,23 @@ public class StudentPanel extends JPanel implements Refreshable {
             loadStudents();
         });
         exportButton.addActionListener(e -> UiUtils.exportToCsv(this, table, "students.csv"));
+        viewButton.addActionListener(e -> showDetailDialog());
         addButton.addActionListener(e -> showAddDialog());
         editButton.addActionListener(e -> showEditDialog());
         deleteButton.addActionListener(e -> deleteSelected());
         table.getSelectionModel().addListSelectionListener(e -> {
             boolean hasSelection = table.getSelectedRow() != -1;
+            viewButton.setEnabled(hasSelection);
             editButton.setEnabled(hasSelection);
             deleteButton.setEnabled(hasSelection);
+        });
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && table.getSelectedRow() != -1) {
+                    showDetailDialog();
+                }
+            }
         });
 
         loadStudents();
@@ -136,6 +156,16 @@ public class StudentPanel extends JPanel implements Refreshable {
         return row == -1 ? null : currentStudents.get(row);
     }
 
+    private void showDetailDialog() {
+        Student selected = getSelectedStudent();
+        if (selected == null) {
+            JOptionPane.showMessageDialog(this, "Please select a student to view.",
+                    "No Selection", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        new StudentDetailDialog((JFrame) SwingUtilities.getWindowAncestor(this), selected).setVisible(true);
+    }
+
     private void showAddDialog() {
         StudentFormDialog dialog =
                 new StudentFormDialog((JFrame) SwingUtilities.getWindowAncestor(this), null);
@@ -146,6 +176,7 @@ public class StudentPanel extends JPanel implements Refreshable {
         }
         try {
             studentDAO.insert(result);
+            enrollInSelectedCourseIfAny(result, dialog.getSelectedCourse());
             loadStudents();
         } catch (SQLException e) {
             if (UiUtils.isDuplicateEntry(e)) {
@@ -155,6 +186,22 @@ public class StudentPanel extends JPanel implements Refreshable {
             } else {
                 UiUtils.showError(this, "Failed to add student.", e);
             }
+        }
+    }
+
+    private void enrollInSelectedCourseIfAny(Student newStudent, Course course) {
+        if (course == null) {
+            return;
+        }
+        try {
+            Enrollment enrollment = new Enrollment();
+            enrollment.setStudentId(newStudent.getId());
+            enrollment.setCourseId(course.getId());
+            enrollment.setEnrolledDate(LocalDate.now());
+            enrollmentDAO.enroll(enrollment);
+        } catch (SQLException e) {
+            UiUtils.showError(this, "Student was added, but enrolling them in "
+                    + course.getCourseCode() + " failed. You can enroll them manually from the Enrollments tab.", e);
         }
     }
 

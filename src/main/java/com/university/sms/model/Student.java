@@ -12,6 +12,7 @@ public class Student {
     private String gender;
     private String contactNo;
     private LocalDate enrollmentDate;
+    private String photoPath;
 
     public Student() {
     }
@@ -70,6 +71,14 @@ public class Student {
 
     public void setEnrollmentDate(LocalDate enrollmentDate) {
         this.enrollmentDate = enrollmentDate;
+    }
+
+    public String getPhotoPath() {
+        return photoPath;
+    }
+
+    public void setPhotoPath(String photoPath) {
+        this.photoPath = photoPath;
     }
 
     @Override

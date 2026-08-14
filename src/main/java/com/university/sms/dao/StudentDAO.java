@@ -42,21 +42,27 @@ public class StudentDAO {
         return students;
     }
 
+    /** Inserts the student and sets the database-generated id back onto the object. */
     public void insert(Student s) throws SQLException {
-        String sql = "INSERT INTO students (full_name, email, dob, gender, contact_no, enrollment_date) "
-                + "VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql)) {
+        String sql = "INSERT INTO students (full_name, email, dob, gender, contact_no, enrollment_date, photo_path) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             bindParams(ps, s);
             ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    s.setId(keys.getInt(1));
+                }
+            }
         }
     }
 
     public void update(Student s) throws SQLException {
         String sql = "UPDATE students SET full_name = ?, email = ?, dob = ?, gender = ?, "
-                + "contact_no = ?, enrollment_date = ? WHERE id = ?";
+                + "contact_no = ?, enrollment_date = ?, photo_path = ? WHERE id = ?";
         try (PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql)) {
             bindParams(ps, s);
-            ps.setInt(7, s.getId());
+            ps.setInt(8, s.getId());
             ps.executeUpdate();
         }
     }
@@ -76,6 +82,7 @@ public class StudentDAO {
         ps.setString(4, s.getGender());
         ps.setString(5, s.getContactNo());
         ps.setDate(6, Date.valueOf(s.getEnrollmentDate()));
+        ps.setString(7, s.getPhotoPath());
     }
 
     private Student mapRow(ResultSet rs) throws SQLException {
@@ -87,6 +94,7 @@ public class StudentDAO {
         s.setGender(rs.getString("gender"));
         s.setContactNo(rs.getString("contact_no"));
         s.setEnrollmentDate(rs.getDate("enrollment_date").toLocalDate());
+        s.setPhotoPath(rs.getString("photo_path"));
         return s;
     }
 }
